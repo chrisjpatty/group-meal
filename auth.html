@@ -1,0 +1,190 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="https://cdn.firebase.com/js/client/2.3.0/firebase.js"></script>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+        <style>
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+                font-family: 'Montserrat', sans-serif;
+            }
+            .dinnerTitle{
+              font-size: 50px;
+              text-transform: uppercase;
+              font-weight: bold;
+              margin-left: 50px;
+              color: #2C3E50;
+            }
+            .infoBox{
+              background-color: #fff;
+              border: 8px solid #3498DB;
+              border-radius: 16px;
+              min-height: 500px;
+            }
+            .profilePicContainer{
+              width: 150px;
+              border: 8px solid #3498DB;
+              border-radius: 100px;
+              position: absolute;
+              top: 0px;
+              left: 0px;
+              z-index: 10;
+            }
+            .dinnerDescription{
+              font-size: 18px;
+              color: #2C3E50;
+              padding-left: 130px;
+              padding-top: 14px;
+            }
+        </style>
+        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+    </head>
+    <body>
+
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-12">
+              <img src="" class="profilePic" id="facebookPic">
+              <span class="userName" id="userName"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="loginBox">
+                <div class="row">
+                  <div class="col-xs-12">
+                    <div class="loginText">
+                      <p>We currently only support facebook login. Sorry.</p>
+                    </div>
+                  </div>
+                  <div class="col-xs-12">
+                    <button id="facebookLoginButton">Login with Facebook</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          // we would probably save a profile when we register new users on our site
+          // we could also read the profile to see if it's null
+          // here we will just simulate this with an isNewUser boolean
+          var isNewUser = true;
+
+          var ref = new Firebase("https://group-meal.firebaseio.com");
+          ref.onAuth(function(authData) {
+            if (authData && isNewUser) {
+              // save the user's profile into the database so we can list users,
+              // use them in Security and Firebase Rules, and show profiles
+              ref.child("users").child(authData.uid).set({
+                provider: authData.provider,
+                name: getName(authData)
+              });
+            }
+          });
+
+/*
+          // REGISTER DOM ELEMENTS
+            var profilePicField = $('#facebookPic');
+            var userNameField = $('#userName');
+
+             ref.on('child_added', function (snapshot) {
+            //GET DATA
+            var data = snapshot.val();
+            //var profilePic = data.facebook.profileImageURL;
+            var userName = data.facebook.displayName;
+
+          });
+
+*/
+
+          // REGISTER DOM ELEMENTS
+          $( document ).ready(function() {
+            var profilePicField = $('#facebookPic');
+            var userNameField = $('#userName');
+
+             ref.on('child_added', function (snapshot) {
+            //GET DATA
+            var data = snapshot.val();
+            //var profilePic = data.facebook.profileImageURL;
+            var userName = data.name;
+            });
+             userNameField.text(userName);
+
+          });
+
+          // find a suitable name based on the meta info given by each provider
+          function getName(authData) {
+            switch(authData.provider) {
+               case 'password':
+                 return authData.password.email.replace(/@.*/, '');
+               case 'twitter':
+                 return authData.twitter.displayName;
+               case 'facebook':
+                 return authData.facebook.displayName;
+            }
+          }
+        // Create a callback which logs the current auth state
+        function authDataCallback(authData) {
+          if (authData) {
+            console.log("User " + authData.uid + " is logged in with " + authData.provider);
+            
+          } else {
+            console.log("User is logged out");
+          }
+        }
+        // Register the callback to be fired every time auth state changes
+        var ref = new Firebase("https://group-meal.firebaseio.com");
+        ref.onAuth(authDataCallback);
+
+        $( '#facebookLoginButton' ).click(function() {
+        // REFERENCE FIREBASE
+          var authRef = new Firebase("https://group-meal.firebaseio.com/");
+          authRef.authWithOAuthPopup("facebook", function(error, authData) {
+            if (error) {
+              console.log("Login Failed!", error);
+            } else {
+              console.log("Authenticated successfully with payload:", authData);
+            }
+          });
+        });
+        </script>
+
+    </div> <!-- /container -->        
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+
+        <script src="js/vendor/bootstrap.min.js"></script>
+
+        <script src="js/main.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
+        </script>
+    
+    </body>
+</html>
